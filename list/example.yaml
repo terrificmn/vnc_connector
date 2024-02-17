@@ -1,0 +1,53 @@
+## com_name1,2,3,4 는 이름 변경해도 됨 (별칭 처럼 사용)
+## 2번째 카테고리인 각 id, ip, port, ssh 는 key는 변경 금지, value(값)들만 변경해서 사용
+
+## port forwarding
+com_name1:
+  id: id1
+  ip: 118.153.10.100
+  port: 35901
+  ssh: 35122
+
+com_name2:
+  id: id2
+  ip: 118.153.10.101
+  port: 35902
+  ssh: 35222
+
+# private network
+com_name3:
+  id: id3
+  ip: 192.168.0.12
+  port: 5901
+  ssh: 22
+
+com_name4:
+  id: id4
+  ip: 192.168.10.13
+  port: 5901
+  ssh: 22
+
+com_name5:
+  id: id5
+  ip: 192.168.10.14
+  port: 5901
+  ssh: 22
+
+com_name6:
+  id: id6
+  ip: 192.168.10.15
+  port: 5901
+  ssh: 22
+
+com_name7:
+  id: id7
+  ip: 192.168.10.16
+  port: 5901
+  ssh: 22
+
+com_name8:
+  id: id8
+  ip: 192.168.10.17
+  port: 5901
+  ssh: 22
+
