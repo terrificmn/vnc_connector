@@ -1,2 +1,4 @@
 .vscode
+list/list.yaml
+CMakeLists.txt.user
 CMakeLists.txt.user.*

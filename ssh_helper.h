@@ -18,13 +18,6 @@
 #include <filesystem>
 
 
-struct RobotCom {
-    std::string id;
-    std::string ip;
-    std::string port;
-    std::string ssh;
-};
-
 class SshHelper : public QObject {
     Q_OBJECT
     // 여기는 함수들 포함해서 지정 (QML 쪽으로 보낸 것들을 정의한다고 생각하면 됨)
@@ -42,23 +35,20 @@ private:
     bool is_button_clicked = false;
     bool is_next_btn_enabled = false;
     bool is_next_btn_ready = false;
+    bool is_tunnelling_enabled = false;
     std::string abs_project_path;
     std::string yaml_path;
-    RobotCom s100;
-    RobotCom p150;
-    RobotCom p150_velo;
-    RobotCom v100_new;
-    RobotCom win_office;
-    RobotCom mecanum;
-    RobotCom etc_user1;
-    RobotCom etc_user2;
     int selected_robot_num = 0;
+
+    std::unordered_map<std::string, std::string> user_map;
+    std::vector<std::string> v_user; 
 
     QProcess *myProcess = nullptr;
 
 public:
     explicit SshHelper(QObject *parent = nullptr, QProcess *myProcess = nullptr);
     void AssignPath(bool is_dev = true);
+    void addUserMap(std::string& com_name, std::string& com_id, std::string& com_ip, std::string& com_port, std::string& com_ssh);
     std::string concatenatedStr(int type_=0);
     QString textForPaste();
     QString textHelpForPaste();
@@ -66,8 +56,7 @@ public:
     void sshTerminalOpen(int type);
     void setSelectRobotNum(int cbbox_index_);
     bool loadYaml();
-    void makeStructValues(std::string com_id, std::string com_ip, std::string com_port, std::string com_ssh, RobotCom* robot_com);
-    RobotCom* selectRobotPtr();
+    std::string selectComName();
 
 public slots:
     void sshConnector(int ckbox_ssh, int ckbox_tunnel, int cbbox_index);
