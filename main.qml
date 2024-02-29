@@ -136,7 +136,7 @@ Window {
                 id: text_version
                 anchors.top: reset.bottom
                 anchors.topMargin: 30
-                text: qsTr("version: 2.5")
+                text: qsTr("version: 2.6")
             }
         }
 

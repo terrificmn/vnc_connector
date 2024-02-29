@@ -135,34 +135,31 @@ void SshHelper::sshConnector(int ckbox_ssh, int ckbox_tunnel, int cbbox_index) {
     this->setSelectRobotNum(cbbox_index);
 
     if(ckbox_ssh == 0 && ckbox_tunnel == 2) {
-        this->sshTerminalOpen(1); // 1 for ssh tunnel 
         this->is_button_clicked = false;
         this->is_tunnelling_enabled = true;
+        qDebug() << "ssh tunnel checked: enabled";
+        this->sshTerminalOpen(1); // 1 for ssh tunnel 
         // this->is_next_btn_ready = false;
         emit buttonClicked();
         return;
     }
     
 
-    if(ckbox_ssh == 2) {
+    if(ckbox_ssh == 2 && ckbox_tunnel == 0) {
         qDebug() << "ssh checked: enabled";
-        this->sshTerminalOpen(0); // 0 for ssh  
+        this->is_tunnelling_enabled = false;
+        this->sshTerminalOpen(0); // 0 for ssh
 
+    } else if(ckbox_ssh == 2 && ckbox_tunnel == 2) {
+        qDebug() << "both ssh and tunnel checked: enabled";
+        this->is_tunnelling_enabled = true;
+        this->sshTerminalOpen(0); // 0 for ssh  
     } else {
         qDebug() << "ssh unchecked: disabled";
     }
 
-    if(ckbox_tunnel == 2) {
-        qDebug() << "ssh tunnel checked: enabled";
-        this->is_next_btn_ready = true;
-        this->is_tunnelling_enabled = true;
-
-    } else {
-        // is_next_btn_ready will be true so that NEXT btn appears
-        qDebug() << "ssh tunnel unchecked: disabled"; 
-        this->is_next_btn_ready = true;
-        this->is_tunnelling_enabled = false;
-    }
+    // is_next_btn_ready will be true so that NEXT btn appears
+    this->is_next_btn_ready = true;
 
     emit textChanged(); // emit 되는 순간에 qml에서 신호를 받는다 
 
@@ -269,7 +266,7 @@ void SshHelper::sshTerminalOpen(int type) {
     clipboard->setText(clip_txt);
     qDebug() << "copied on clipboard";
 
-    if(is_tunnelling_enabled) { // tennelling checkout 박스 없을 경우에는 프로그램 실행 안함
+    if(is_tunnelling_enabled || type == 0) { // tennelling checkout 박스 없을 경우에는 프로그램 실행 안함
         QString program = "terminator";
         myProcess->start(program);
         qDebug() << "second terminal opened!";

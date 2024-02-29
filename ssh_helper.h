@@ -20,12 +20,13 @@
 
 class SshHelper : public QObject {
     Q_OBJECT
-    // 여기는 함수들 포함해서 지정 (QML 쪽으로 보낸 것들을 정의한다고 생각하면 됨)
+    // 여기는 함수들 포함해서 지정 (c++에서 QML 쪽으로 보내는 것들을 정의한다고 생각하면 됨)
     // Q_PROPERTY(<함수의리턴타입> <함수이름> READ <함수이름> NOTIFY <signal>)   ---- 여기에서 함수는 현재 클래스의 c++ 함수
-    // QML쪽에서는 C++의 slots함수를 통해서 호출하게 됨
+    // 프로그램 중 emit 시그널() (NOTIFY) 을 보냈을 경우, 여기에 정의한 함수가 실행이 되게 된다.
     Q_PROPERTY(QString textForPaste READ textForPaste NOTIFY textChanged)
     Q_PROPERTY(QString textHelpForPaste READ textHelpForPaste NOTIFY textChanged)
     Q_PROPERTY(bool isNextBtnEnabled READ isNextBtnEnabled NOTIFY buttonClicked)
+    // 반대로 QML쪽에서는 C++의 slots함수를 통해서 호출하게 됨
 
     // Q_PROPERTY(WRITE sshConnector NOTIFY textChanged)
     // Q_PROPERTY(WRITE sshConnector NOTIFY textChanged)
