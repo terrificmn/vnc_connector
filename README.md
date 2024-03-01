@@ -105,3 +105,10 @@ version 2.4
 version 2.5
 - RobotCom 클래스를 이용해서 yaml 정보를 하나씩 넣어줬던 방식에서 (여러개의 instances)  
   unordered_map 형태로 만들어서 키, 벨류 형태로 조합 및 사용
+
+version 2.6  
+- 처음 실행 시 터미널이 실행 안되는 버그 수정
+
+version 2.7
+- QML ComboBox 에서 하드코딩 후에 빌드해야 했으나, yaml 파일에서 읽은 리스트를 사용할 수 있게 변경  
+- list/list.yaml 파일에서 첫 번째 파라미터들을 가져온다.
