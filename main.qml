@@ -24,7 +24,7 @@ Window {
         ComboBox {
             id: cbbox_user
             width: 200
-            model: [ "s100", "p150", "p150-velo", "v100", "win_office", "mecanum", "etc1", "etc2"]
+            model: sshHelper.readListName //get QStringList from c++ function invoked by signal readListOnce
         }
 
         CheckBox {
@@ -91,7 +91,6 @@ Window {
                     // console.log(ckbox_ssh_tunnel.checkState)
                     sshHelper.sshTunnelConnector(ckbox_ssh_tunnel.checkState, cbbox_user.currentIndex)
                 }
-
             }
 
             TextEdit {

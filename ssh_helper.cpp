@@ -96,6 +96,7 @@ bool SshHelper::loadYaml() {
     // std::cout << yaml_load["id"].as<int>() << std::endl;
     // std::cout << yaml_load["is_id_ever_get"].as<std::string>() << std::endl;
     std::cout << "a config file loaded successfully" << std::endl;
+    emit readListOnce();
     return true;
 }
 
@@ -119,6 +120,14 @@ void SshHelper::addUserMap(std::string& com_name, std::string& com_id, std::stri
 }
 
 
+/// @brief called by QML, then trigger the signal and the connected function 
+/// button click(QML) -> this function -> emit (signals) buttonClicked() -> connected function (READ) call
+///
+/// for example: button clicked(QML) -> sshConnector() -> emit textChanged() -> 
+/// -> 여기서 시글널 발생시 헤더파일에 Q_PROPERTY() 매크로에 의해 정의된 textHelpForPaste() 함수가 실행됨
+/// @param ckbox_ssh 
+/// @param ckbox_tunnel 
+/// @param cbbox_index 
 void SshHelper::sshConnector(int ckbox_ssh, int ckbox_tunnel, int cbbox_index) {
     this->is_button_clicked = true;
 
@@ -315,3 +324,15 @@ void SshHelper::reset() {
     emit buttonClicked();
 }
 
+QStringList SshHelper::readListName() {
+    //  "s100", "p150", "p150-velo", "v100", "win_office", "mecanum", "etc1", "etc2"
+    QStringList list;
+    
+    for(int i=0; i < this->v_user.size(); ++i) {
+        list << QString::fromStdString(this->v_user[i]);
+        // list.push_back(QString::fromStdString(this->v_user[i]));
+        // qDebug() << QString::fromStdString(this->v_user[i]);
+    }
+    qDebug() << list;
+    return list;
+}
