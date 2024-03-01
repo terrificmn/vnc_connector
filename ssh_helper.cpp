@@ -62,47 +62,31 @@ void SshHelper::AssignPath(bool is_dev) {
 bool SshHelper::loadYaml() {
     try {
         YAML::Node yaml_load = YAML::LoadFile(this->yaml_path);
-        int size = yaml_load.size();
-        int count=0;
-        if(size > 8) { // 현재는 리스트 5개  --> 8개
-            std::cout << "error: a one group in the yaml file found that is exceeded to handle." << std::endl;
-            return false;
-        }
-
+        // int size = yaml_load.size(); // size 제한 없음
+        
         for(YAML::const_iterator it = yaml_load.begin(); it!=yaml_load.end();++it) {
+            YAML::Node com_node_name = it->first;
             YAML::Node com = it->second;
+
+            // std::cout << "com name " << com_name << std::endl;
             // std::cout << com["id"] << std::endl;
             // std::cout << com["ip"] << std::endl;
             // std::cout << com["port"] << std::endl;
             // std::cout << com["ssh"] << std::endl;
 
+            std::string com_name = com_node_name.as<std::string>();
             std::string com_id = com["id"].as<std::string>();
             std::string com_ip = com["ip"].as<std::string>();
             std::string com_port = com["port"].as<std::string>();
             std::string com_ssh = com["ssh"].as<std::string>();
-            
-            RobotCom* ptr_robot_com = nullptr;
-            if(count == 0) {
-                ptr_robot_com = &this->s100;
-            } else if(count == 1) {
-                ptr_robot_com = &this->p150;
-            } else if(count == 2) {
-                ptr_robot_com = &this->p150_velo;
-            } else if(count == 3) {
-                ptr_robot_com = &this->v100_new;
-            } else if(count == 4) {
-                ptr_robot_com = &this->win_office;
-            } else if(count == 5) {
-                ptr_robot_com = &this->mecanum;
-            } else if(count == 6) {
-                ptr_robot_com = &this->etc_user1;
-            } else if(count == 7) {
-                ptr_robot_com = &this->etc_user2;
-            } 
-            
-            this->makeStructValues(com_id, com_ip, com_port, com_ssh, ptr_robot_com);
-            count++;
+
+            this->addUserMap(com_name, com_id, com_ip, com_port, com_ssh);
         }
+
+        // test print
+        // for(auto map : this->user_map) {
+        //     std::cout << map.first << " :" << map.second << std::endl;
+        // }
 
     } catch(...) {
         std::cout << "Opening yaml file failure. Error occured..." << std::endl;
@@ -115,20 +99,23 @@ bool SshHelper::loadYaml() {
     return true;
 }
 
-/**
- * @brief struct RobotCom 포인터로 받아서 처리, yaml에서 읽은 데이터를 하나씩 할당
- * 
- * @param com_id 
- * @param com_ip 
- * @param com_port 
- * @param com_ssh 
- * @param robot_com pointer of struct RobotCom
- */
-void SshHelper::makeStructValues(std::string com_id, std::string com_ip, std::string com_port, std::string com_ssh, RobotCom* robot_com) {
-        robot_com->id = com_id;
-        robot_com->ip = com_ip;
-        robot_com->port = com_port;
-        robot_com->ssh = com_ssh;
+
+void SshHelper::addUserMap(std::string& com_name, std::string& com_id, std::string& com_ip, std::string& com_port, std::string& com_ssh) {
+    /// 대표이름으로 사용할 vector, yaml의 각 대표 이름
+    this->v_user.push_back(com_name);
+
+    //// user_map convetion; {v_user}_{id , ip, port, or ssh}
+    std::string con_id_str = com_name + "_id";
+    std::string con_ip_str = com_name + "_ip";
+    std::string con_port_str = com_name + "_port";
+    std::string con_ssh_str = com_name + "_ssh";
+
+    this->user_map[con_id_str] = com_id;
+    this->user_map[con_ip_str] = com_ip;
+    this->user_map[con_port_str] = com_port;
+    this->user_map[con_ssh_str] = com_ssh;
+
+    qDebug("mapping done!");
 }
 
 
@@ -139,6 +126,7 @@ void SshHelper::sshConnector(int ckbox_ssh, int ckbox_tunnel, int cbbox_index) {
         qDebug() << "nothing happen";
         this->is_button_clicked = false;
         this->is_next_btn_ready = false;
+        this->is_tunnelling_enabled = false;
         emit textChanged();
         emit buttonClicked();
         return;
@@ -147,30 +135,31 @@ void SshHelper::sshConnector(int ckbox_ssh, int ckbox_tunnel, int cbbox_index) {
     this->setSelectRobotNum(cbbox_index);
 
     if(ckbox_ssh == 0 && ckbox_tunnel == 2) {
-        this->sshTerminalOpen(1); // 1 for ssh tunnel 
         this->is_button_clicked = false;
+        this->is_tunnelling_enabled = true;
+        qDebug() << "ssh tunnel checked: enabled";
+        this->sshTerminalOpen(1); // 1 for ssh tunnel 
         // this->is_next_btn_ready = false;
         emit buttonClicked();
         return;
     }
     
 
-    if(ckbox_ssh == 2) {
+    if(ckbox_ssh == 2 && ckbox_tunnel == 0) {
         qDebug() << "ssh checked: enabled";
-        this->sshTerminalOpen(0); // 0 for ssh  
+        this->is_tunnelling_enabled = false;
+        this->sshTerminalOpen(0); // 0 for ssh
 
+    } else if(ckbox_ssh == 2 && ckbox_tunnel == 2) {
+        qDebug() << "both ssh and tunnel checked: enabled";
+        this->is_tunnelling_enabled = true;
+        this->sshTerminalOpen(0); // 0 for ssh  
     } else {
         qDebug() << "ssh unchecked: disabled";
     }
 
-    if(ckbox_tunnel == 2) {
-        qDebug() << "ssh tunnel checked: enabled";
-        this->is_next_btn_ready = true;
-
-    } else {
-        qDebug() << "ssh tunnel unchecked: disabled";
-        this->is_next_btn_ready = false;
-    }
+    // is_next_btn_ready will be true so that NEXT btn appears
+    this->is_next_btn_ready = true;
 
     emit textChanged(); // emit 되는 순간에 qml에서 신호를 받는다 
 
@@ -180,26 +169,10 @@ void SshHelper::sshConnector(int ckbox_ssh, int ckbox_tunnel, int cbbox_index) {
 
 }
 
-RobotCom* SshHelper::selectRobotPtr() {
-    RobotCom* ptr_robot_com = nullptr;
-    if(this->selected_robot_num == 0) {
-        ptr_robot_com = &this->s100;
-    } else if(this->selected_robot_num == 1) {
-        ptr_robot_com = &this->p150;
-    } else if(this->selected_robot_num == 2) {
-        ptr_robot_com = &this->p150_velo;
-    } else if(this->selected_robot_num == 3) {
-        ptr_robot_com = &this->v100_new;
-    } else if(this->selected_robot_num == 4) {
-        ptr_robot_com = &this->win_office;
-    } else if(this->selected_robot_num == 5) {
-        ptr_robot_com = &this->mecanum;
-    } else if(this->selected_robot_num == 6) {
-        ptr_robot_com = &this->etc_user1;
-    } else if(this->selected_robot_num == 7) {
-        ptr_robot_com = &this->etc_user2;
-    }
-    return ptr_robot_com;
+// return v_user의 문자열, yaml파일의 대표 name이 들어가 있음.
+// unordered_map 에서 인덱스 대신에 사용한다. 에: com_name1 ---> 이후 com_name1_ip, com_name1_ssh 등의 key 값으로 사용이된다.
+std::string SshHelper::selectComName() {
+    return this->v_user[this->selected_robot_num];
 }
 
 /**
@@ -209,23 +182,31 @@ RobotCom* SshHelper::selectRobotPtr() {
  * @return std::string 
  */
 std::string SshHelper::concatenatedStr(int type_) {
-    RobotCom* ptr_robot_com = this->selectRobotPtr();
-
     std::string concanated = "ssh ";
+    // std::cout << "selectComName: " << this->selectComName() << std::endl;
+    std::string user_map_prefix = this->selectComName();
     if(type_ == 0) {
-        if(ptr_robot_com->ssh == "22") {
-            concanated += ptr_robot_com->id + "@" + ptr_robot_com->ip;
+        if(this->user_map[user_map_prefix + "_ssh"] == "22") {
+            concanated += this->user_map[user_map_prefix + "_id"] + "@" + this->user_map[user_map_prefix + "_ip"];
         } else {
-            concanated += ptr_robot_com->id + "@" + ptr_robot_com->ip + " -p " + ptr_robot_com->ssh;
+            concanated += this->user_map[user_map_prefix + "_id"] + "@" + this->user_map[user_map_prefix + "_ip"] + " -p " + this->user_map[user_map_prefix + "_ssh"];
         }
 
     } else {
-        if(ptr_robot_com->ssh == "22") {
-            concanated += "-L " + ptr_robot_com->port + ":127.0.0.1:5901 -N -f -l " + ptr_robot_com->id + " " + ptr_robot_com->ip;
+        if(this->is_tunnelling_enabled) {
+            if(this->user_map[user_map_prefix + "_ssh"] == "22") {
+                concanated += "-L " + this->user_map[user_map_prefix + "_port"] + ":127.0.0.1:5901 -N -f -l " + this->user_map[user_map_prefix + "_id"] + " " + this->user_map[user_map_prefix + "_ip"];
+            } else {
+                concanated += "-p " + this->user_map[user_map_prefix + "_ssh"] + " -L " + this->user_map[user_map_prefix + "_port"] + ":127.0.0.1:5901 -N -f -l " + this->user_map[user_map_prefix + "_id"] + " " + this->user_map[user_map_prefix + "_ip"];
+            }
+
         } else {
-            concanated += "-p " + ptr_robot_com->ssh + " -L " + ptr_robot_com->port + ":127.0.0.1:5901 -N -f -l " + ptr_robot_com->id + " " + ptr_robot_com->ip;
+            concanated = "vncserver :2 -localhost no";
         }
+
     }
+
+    // std::cout << "!!!!concanated: " << concanated << " !!!" << std::endl; // test print
     return concanated;
 
 }
@@ -249,8 +230,8 @@ QString SshHelper::textHelpForPaste() {
         return "Copy and paste the message which will be appeared shortly\nafter you click the OK button";
     } else {
         if(this->is_next_btn_enabled) {
-            RobotCom* ptr_robot_com = this->selectRobotPtr();
-            std::string tmp_str = "vncviewer localhost:" + ptr_robot_com->port + " &";
+            std::string user_map_prefix = this->selectComName();
+            std::string tmp_str = "vncviewer localhost:" + this->user_map[user_map_prefix+"_port"] + " &";
             return QString::fromStdString(tmp_str);
         }
         return "vncserver :1 -localhost -geometry 1024x768 -depth 24";
@@ -271,10 +252,6 @@ bool SshHelper::isNextBtnEnabled() {
  * @param cbbox_index_ 
  */
 void SshHelper::setSelectRobotNum(int cbbox_index_) {
-//    if(cbbox_index_ > 7) { // total count of current combobox comparison
-//        std::cout << "combo box index is wrong. setSelectRobotNum()" << std::endl;
-//    }
-    // just assign cbbox_index_ to selected_robot_num as simple
     this->selected_robot_num = cbbox_index_;
 }
 
@@ -289,9 +266,11 @@ void SshHelper::sshTerminalOpen(int type) {
     clipboard->setText(clip_txt);
     qDebug() << "copied on clipboard";
 
-    QString program = "terminator";
-    myProcess->start(program);
-    qDebug() << "second terminal opened!";
+    if(is_tunnelling_enabled || type == 0) { // tennelling checkout 박스 없을 경우에는 프로그램 실행 안함
+        QString program = "terminator";
+        myProcess->start(program);
+        qDebug() << "second terminal opened!";
+    }
 }
 
 void SshHelper::sshTunnelConnector(int ckbox_tunnel, int cbbox_index) {
@@ -300,10 +279,11 @@ void SshHelper::sshTunnelConnector(int ckbox_tunnel, int cbbox_index) {
         return;
     }
 
-    if(ckbox_tunnel != 2) {
-        qDebug("please checkbox first2");
-        return;
-    }
+    // is_next_btn_ready will be true, if unchecked, then excuted without the ssh tunneling
+    // if(ckbox_tunnel != 2) {
+    //     qDebug("please checkbox first2");
+    //     return;
+    // }
 
     if(myProcess == nullptr) {
         qDebug("process not started");

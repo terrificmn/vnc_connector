@@ -102,3 +102,6 @@ version 2.3
 version 2.4
 - yaml 파일 업데이트, 여유분으로 2개 더 추가
 
+version 2.5
+- RobotCom 클래스를 이용해서 yaml 정보를 하나씩 넣어줬던 방식에서 (여러개의 instances)  
+  unordered_map 형태로 만들어서 키, 벨류 형태로 조합 및 사용
