@@ -41,6 +41,13 @@ cp -r ~/qt_ws/vnc_connector/list ~/vnc_connector/
 
 > build kit이름에 따라 달라지나, 보통 Desktop-Release 처럼 사용됨  
 
+> 최초 qt_ws 를 workspace를 만들지 않았다면 vnc_connetor 패키지 디렉토리 안에 build 디렉토리가 생기고  
+그 안에 Desktop-Release, Desktop-Debug 등으로 빌드가 된다.   
+그러므로 특정 디렉토리를 project 저장 장소를 하려면 새로운 프로젝트를 만들고 (아무거나)   
+이후 Proejct Location 정할 때 경로 및 디렉토리를 정하고 Use as default project location 에 체크를 해주면 된다.  
+그렇게 대충대충 기본값으로 next, next를 눌러서 finish 시켜준다. (이후 뉴프로젝트는 지워준다)  
+
+
 복사된 yaml파일의 데이터를 수정한다    
 이름은 반드시 **list.yaml 로 바꾼다**  
 - com_name1,2,3,4 는 이름 변경해도 됨 (별칭 처럼 사용)
