@@ -203,10 +203,16 @@ std::string SshHelper::concatenatedStr(int type_) {
 
     } else {
         if(this->is_tunnelling_enabled) {
+            /// 일단 내부port를 입력 받은 것은 아직 없으므로, 기본적으로 5901를 사용 안하고 사용한다고 하면 5902 포트라고 고정
+            std::string default_port = "5901";
+            if(this->user_map[user_map_prefix +"_port"] != "5901") {
+                /// TODO: 추후 내부포트 입력 받는 것 추가하기
+                default_port = "5902";
+            }
             if(this->user_map[user_map_prefix + "_ssh"] == "22") {
-                concanated += "-L " + this->user_map[user_map_prefix + "_port"] + ":127.0.0.1:5901 -N -f -l " + this->user_map[user_map_prefix + "_id"] + " " + this->user_map[user_map_prefix + "_ip"];
+                concanated += "-L " + this->user_map[user_map_prefix + "_port"] + ":127.0.0.1:" + default_port + " -N -f -l " + this->user_map[user_map_prefix + "_id"] + " " + this->user_map[user_map_prefix + "_ip"];
             } else {
-                concanated += "-p " + this->user_map[user_map_prefix + "_ssh"] + " -L " + this->user_map[user_map_prefix + "_port"] + ":127.0.0.1:5901 -N -f -l " + this->user_map[user_map_prefix + "_id"] + " " + this->user_map[user_map_prefix + "_ip"];
+                concanated += "-p " + this->user_map[user_map_prefix + "_ssh"] + " -L " + this->user_map[user_map_prefix + "_port"] + ":127.0.0.1:" + default_port + " -N -f -l " + this->user_map[user_map_prefix + "_id"] + " " + this->user_map[user_map_prefix + "_ip"];
             }
 
         } else {
