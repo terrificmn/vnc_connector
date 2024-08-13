@@ -109,4 +109,8 @@ version 2.6
 
 version 2.7
 - QML ComboBox 에서 하드코딩 후에 빌드해야 했으나, yaml 파일에서 읽은 리스트를 사용할 수 있게 변경  
-- list/list.yaml 파일에서 첫 번째 파라미터들을 가져온다.
+- list/list.yaml 파일에서 첫 번째 파라미터들을 가져온다.   
+
+version 2.8
+- NEXT 버튼을 눌러서 vncserver 커맨드와 vncviewer 커맨드 까지 복사할 수 있게 수정  
+- qml NEXT 버튼의 text가 변경됨

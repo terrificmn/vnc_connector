@@ -74,7 +74,7 @@ Window {
 
             Button {
                 id: next_button
-                text: qsTr("NEXT")
+                text: sshHelper.changeBtnText ? qsTr("VNCViewer") : qsTr("NEXT")
                 anchors.left: button.right
                 anchors.leftMargin: 10
 
@@ -135,7 +135,7 @@ Window {
                 id: text_version
                 anchors.top: reset.bottom
                 anchors.topMargin: 30
-                text: qsTr("version: 2.7")
+                text: qsTr("version: 2.8")
             }
         }
 

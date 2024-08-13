@@ -28,6 +28,9 @@ class SshHelper : public QObject {
     Q_PROPERTY(QString textHelpForPaste READ textHelpForPaste NOTIFY textChanged)
     Q_PROPERTY(bool isNextBtnEnabled READ isNextBtnEnabled NOTIFY buttonClicked)
     Q_PROPERTY(QStringList readListName READ readListName NOTIFY readListOnce)
+    Q_PROPERTY(bool changeBtnText READ changeBtnText NOTIFY sigVncviewerButton);
+
+
     // 반대로 QML쪽에서는 C++의 slots함수를 통해서 호출하게 됨
 
     // Q_PROPERTY(WRITE sshConnector NOTIFY textChanged)
@@ -47,6 +50,8 @@ private:
     std::vector<std::string> v_user; 
 
     QProcess *myProcess = nullptr;
+    int is_first_cmd_copied = false;
+    bool next_btn_to_change = false;
 
 public:
     explicit SshHelper(QObject *parent = nullptr, QProcess *myProcess = nullptr);
@@ -59,7 +64,8 @@ public:
     QString textForPaste();
     QString textHelpForPaste();
     QStringList readListName();
-    
+    bool changeBtnText();
+
     bool isNextBtnEnabled(); // 안되는 듯..
     void sshTerminalOpen(int type);
     void setSelectRobotNum(int cbbox_index_);
@@ -77,6 +83,7 @@ signals:
     void textChanged();
     void buttonClicked();
     void readListOnce();
+    void sigVncviewerButton();
 
 };
 

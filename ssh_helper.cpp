@@ -186,7 +186,7 @@ std::string SshHelper::selectComName() {
 
 /**
  * @brief it creates strings which is going to use in a terminal to execute 
- * 
+ * type_ == 0 : ssh connection command,  type_ == 1: vncserver command,  type_ == 2: vncviewer command
  * @param type_ 
  * @return std::string 
  */
@@ -201,7 +201,7 @@ std::string SshHelper::concatenatedStr(int type_) {
             concanated += this->user_map[user_map_prefix + "_id"] + "@" + this->user_map[user_map_prefix + "_ip"] + " -p " + this->user_map[user_map_prefix + "_ssh"];
         }
 
-    } else {
+    } else if(type_ == 1) {
         if(this->is_tunnelling_enabled) {
             /// 일단 내부port를 입력 받은 것은 아직 없으므로, 기본적으로 5901를 사용 안하고 사용한다고 하면 5902 포트라고 고정
             std::string default_port = "5901";
@@ -219,6 +219,12 @@ std::string SshHelper::concatenatedStr(int type_) {
             concanated = "vncserver :2 -localhost no";
         }
 
+    } else { // 2, NEXT로 이미 버튼이 한번 눌린 상태에서 viewer 관련 cmd만 출력
+        if(this->is_tunnelling_enabled) {
+            concanated = "vncviewer localhost:" + this->user_map[user_map_prefix+"_port"] + " &";
+        } else {
+            concanated = "vncviewer " + this->user_map[user_map_prefix + "_ip"] + ":" + this->user_map[user_map_prefix+"_port"] + " &";
+        }
     }
 
     // std::cout << "!!!!concanated: " << concanated << " !!!" << std::endl; // test print
@@ -261,6 +267,18 @@ bool SshHelper::isNextBtnEnabled() {
     return this->is_next_btn_enabled ;
 }
 
+/// @brief  change NEXT btn's text. connected signals is sigVncviewerButton()
+/// @return 
+bool SshHelper::changeBtnText() {
+    if(!this->is_first_cmd_copied) {
+        this->next_btn_to_change = false;
+    } else {
+        this->next_btn_to_change = true;
+    }
+
+    return this->next_btn_to_change;
+}
+
 /**
  * @brief value of combo list from QML, selected_robot_num variable set
  * 
@@ -280,6 +298,11 @@ void SshHelper::sshTerminalOpen(int type) {
     QClipboard *clipboard =  QGuiApplication::clipboard();
     clipboard->setText(clip_txt);
     qDebug() << "copied on clipboard";
+
+    if(type == 2) {
+        std::cout << "not open a new terminal\n";
+        return;
+    }
 
     if(is_tunnelling_enabled || type == 0) { // tennelling checkout 박스 없을 경우에는 프로그램 실행 안함
         QString program = "terminator";
@@ -317,7 +340,15 @@ void SshHelper::sshTunnelConnector(int ckbox_tunnel, int cbbox_index) {
         emit textChanged();
     }
 
-    this->sshTerminalOpen(1); // 1 for ssh tunnel 
+    // NEXT 버튼으로 한번 수행 했을 경우 더 이상 새로운 창 안 띄움
+    if(!this->is_first_cmd_copied) {
+        this->sshTerminalOpen(1); // 1 for ssh tunnel 
+        this->is_first_cmd_copied = true;
+        this->sigVncviewerButton();
+
+    } else {
+        this->sshTerminalOpen(2); // without terminal open, type 2는 현재 마지막 클릭이라고 가정 -viewer 관련 복사가 될 수 있게 처리
+    }
 
 }
 
@@ -325,9 +356,12 @@ void SshHelper::reset() {
     this->is_button_clicked = false;
     this->is_next_btn_enabled = false;
     this->is_next_btn_ready = false;
-    
+    this->is_first_cmd_copied = false;
+    this->next_btn_to_change = false;
+
     emit textChanged();
     emit buttonClicked();
+    emit sigVncviewerButton();
 }
 
 QStringList SshHelper::readListName() {
