@@ -33,15 +33,19 @@ void SshHelper::AssignPath(bool is_dev) {
         this->abs_project_path = tmp_abs_dir + "/vnc_connector"; //project (//dev 
     } else {
         /// symlink 일 경우에 확인: release의 경우 symlink을 해서 실행할 경우에는 symlink가 있는 디렉토리를 검색해서 실제yaml파일을 찾을 수 없게됨
-        std::string sym_path_execute_name = "/usr/bin/vnc_connector";
-        // std::cout << "sym path: " << sym_path_execute_name << std::endl;
-        if(std::filesystem::is_symlink(sym_path_execute_name)) {
-            // std::cout << "read symlink: " << std::filesystem::read_symlink(sym_path_execute_name) << std::endl;
-            std::filesystem::path origin_path = std::filesystem::absolute(std::filesystem::read_symlink(sym_path_execute_name));
-            this->abs_project_path = std::filesystem::absolute(origin_path.parent_path());
-        } else { 
-            std::cout << "not symlink" << std::endl;
+        std::array<const char*, 2> a_sym_path_execute_names = { "/usr/local/bin/vnc_connector", "/usr/bin/vnc_connector" };
+        for(auto sym_path_execute_name : a_sym_path_execute_names) {
+            if(std::filesystem::is_symlink(sym_path_execute_name)) {
+                // std::cout << "read symlink: " << std::filesystem::read_symlink(sym_path_execute_name) << std::endl;
+                std::filesystem::path origin_path = std::filesystem::absolute(std::filesystem::read_symlink(sym_path_execute_name));
+                this->abs_project_path = std::filesystem::absolute(origin_path.parent_path());
+                std::cout << "symlink found" << std::endl;
+                break;
+            } else { 
+                std::cout << "not symlink" << std::endl;
+            }
         }
+
         // this->abs_project_path = p;
         // this->abs_project_path = std::filesystem::absolute(p); //project (it can be changed when release)
     }
