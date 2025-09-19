@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     SshHelper *sshHelper = new SshHelper(&app, myProcess);
     engine.rootContext()->setContextProperty("sshHelper", sshHelper);
 
-    const QUrl url(u"qrc:/vnc_connector/main.qml"_qs);
+    const QUrl url = QUrl(QStringLiteral("qrc:/vnc_connector/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject *obj, const QUrl &objUrl) {
         if (!obj && url == objUrl)
