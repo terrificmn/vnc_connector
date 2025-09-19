@@ -3,7 +3,7 @@ import QtQuick.Window
 import QtQuick.Controls
 
 Window {
-    width: 540
+    width: 570
     height: 400
     visible: true
     title: qsTr("VNC Connection")
@@ -144,6 +144,7 @@ Window {
                 TextEdit {
                     id: text_version
                     anchors.top: reset.bottom
+                    anchors.right: parent.right
                     anchors.topMargin: 30
                     text: qsTr("version: 2.9")
                 }
