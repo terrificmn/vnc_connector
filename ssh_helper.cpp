@@ -46,6 +46,18 @@ void SshHelper::AssignPath(bool is_dev) {
             }
         }
 
+        /// temp -- fix to the shared directory
+        std::string home = std::getenv("HOME");
+        // std::cout << "HOME:" << home << std::endl;
+        std::string local_share_path = home + "/.local/share/vnc_connector";
+
+        if(!std::filesystem::exists(local_share_path)) {
+            std::string list_dir = local_share_path + "/list";
+            std::filesystem::create_directories(list_dir);
+            std::cout << "vnc_connector and list directories have been created" << std::endl;
+        }
+        this->abs_project_path = local_share_path;
+        
         // this->abs_project_path = p;
         // this->abs_project_path = std::filesystem::absolute(p); //project (it can be changed when release)
     }
